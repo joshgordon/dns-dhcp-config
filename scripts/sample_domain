@@ -1,0 +1,32 @@
+#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*
+# This is a sample configuration file for loading into the database. 
+#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*
+
+## The usage is listed below. When done, check this file back into svn and run
+## update-dns-dhcp as root on gemstone. 
+##
+## A host entry looks like this: 
+#
+# [unique-name] 
+# hostname: unique
+# ip: 192.168.100.100
+# mac: 00:DE:AD:BE:EF:00
+# 
+## The [unique-name] is the one used in the dhcp configuration and must be 
+## unique. 
+
+################################################################################
+# A cname can be defined in the [cname] section. 
+################################################################################
+# Cname's
+[cname] 
+svn:gemstone
+dinners:gemstone
+
+################################################################################
+# Misc. stuff: 
+
+[dlinkrouter]
+hostname: dlinkrouter
+ip: 192.168.0.1
+mac: B8:A3:86:67:A3:D2 
