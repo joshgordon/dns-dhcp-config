@@ -38,12 +38,12 @@ def main():
                 ip = config.get(section, "ip")
                 mac = config.get(section, "mac")
 
-                cur.execute("INSERT INTO hosts (dhcpname, hostname, ipaddress, mac) VALUES('" + section + "', '" + host + "', '" + ip + "', '" + mac + "');")
+                cur.execute("INSERT INTO hosts (dhcpname, hostname, ipaddress, mac) VALUES(%s, %s, %s, %s);", (section, host, ip, mac))
         
             else: 
                 cnames = config.items(section)
                 for cname in cnames:
-                    cur.execute("INSERT INTO cname (cname, host) values('" + cname[0] + "', '" + cname[1] + "');")
+                    cur.execute("INSERT INTO cname (cname, host) values(%s, %s);", (cname[0], cname[1]))
 
 
 main() 
