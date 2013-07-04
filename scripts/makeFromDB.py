@@ -51,7 +51,7 @@ def addReverseDNS(file, host, ip):
 def addDHCP(file, uniqueName, mac, ip): 
     file.write("\thost {0} {{ \n\t\thardware ethernet {1};\n\t\tfixed-address {2};\n\t}}\n".format(uniqueName, mac, ip))
 
-Def main(): 
+def main(): 
     #Set up the DB connection 
     con = mdb.connect(dbhost, dbuser, dbpass, dbname)
 
@@ -60,7 +60,7 @@ Def main():
         
         #Compute the file names. 
         dns_file="db." + domain 
-        rdns_file="db." + rdns_domain.split('.')[0]
+        rdns_file="db." + rdns_ip.split('.')[0]
 
 
         #Remove the existing config files. 
@@ -82,7 +82,7 @@ Def main():
     
         #build the top part of the dhcp files. 
         buildDNSHead(db_rdns)
-        db_rdns.write("{0}.{1}.{2}.in-addr.arpa. \t IN \t NS \t {3}.\n".format(rdns_domain.split('.')[2], rdns_domain.split('.')[1], rdns_domain.split('.')[0], nameserver))
+        db_rdns.write("{0}.{1}.{2}.in-addr.arpa. \t IN \t NS \t {3}.\n".format(rdns_ip.split('.')[2], rdns_ip.split('.')[1], rdns_ip.split('.')[0], nameserver))
 
         buildDNSHead(db_domain) 
         db_domain.write("@ \t IN \t NS \t {0}.\n".format(nameserver)) 
