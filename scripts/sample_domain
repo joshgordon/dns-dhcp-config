@@ -30,3 +30,4 @@ dinners:gemstone
 hostname: dlinkrouter
 ip: 192.168.0.1
 mac: B8:A3:86:67:A3:D2 
+comment: example

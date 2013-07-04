@@ -1,4 +1,4 @@
-#/usr/bin/python
+#!/usr/bin/python
 
 from config import * 
 import ConfigParser
@@ -38,11 +38,7 @@ def main():
                 ip = config.get(section, "ip")
                 mac = config.get(section, "mac")
                 comment = config.get(section, "comment") 
-                if (comment == "None"): 
-                    comment = "" 
-                
-                print "Loading %-20s hostname: %-20s ip: %-17s mac: %-20s  %s " % (section, host, ip, mac, comment) 
-                  
+
                 cur.execute("INSERT INTO hosts (dhcpname, hostname, ipaddress, mac, comment) VALUES(%s, %s, %s, %s, %s);", (section, host, ip, mac, comment))
         
             else: 
