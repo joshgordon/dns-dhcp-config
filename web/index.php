@@ -6,7 +6,7 @@ $rs = mysql_query($query);
 ?>
 
 <table border=1 cellpadding=3>
-<tr><td></td> <td>dhcp name</td> <td>dns name</td> <td>ip</td> <td>mac</td><td></td></tr>
+<tr><td></td> <td>dhcp name</td> <td>dns name</td> <td>ip</td> <td>mac</td><td>Comment</td><td></td></tr>
 <?php
 while ($row = mysql_fetch_assoc($rs)) { ?>
     <tr> 
@@ -15,6 +15,7 @@ while ($row = mysql_fetch_assoc($rs)) { ?>
         <td><?php echo $row['hostname'];?></td> 
         <td><?php echo $row['ipaddress'];?></td>  
         <td><?php echo $row['mac'];?></td>
+        <td><?php echo $row['comment'];?></td>
         <td><a href="confirm.php?record=<?php echo $row['dhcpname'];?>">Delete</a></td>
     </tr>
 <?php 
@@ -22,6 +23,7 @@ while ($row = mysql_fetch_assoc($rs)) { ?>
 ?>
 </table>
 <a href="change.php">Add new record</a>
+<a href="cname.php">Edit cnames</a> 
 <?php
 
 mysql_close();

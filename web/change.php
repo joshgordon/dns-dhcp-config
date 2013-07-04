@@ -1,6 +1,8 @@
 <?php
 include 'loadDB.php'; 
 
+$_GET = sanitize($_GET); 
+
 $record = $_GET['dhcp']; 
 $query = "select * from hosts where dhcpname = '$record'"; 
 $rs = mysql_query($query); 
@@ -27,6 +29,10 @@ $row = mysql_fetch_row($rs);
     <tr> 
         <td>Mac Address: </td>
         <td><input type="text" name="mac" value="<?php echo $row[3];?>"></td>
+    </tr>
+    <tr> 
+        <td>Comment: </td>
+        <td><input type="text" name="comment" value="<?php echo $row[4];?>"></td>
     </tr>
 </table>
 <input type="submit" value="Update">
