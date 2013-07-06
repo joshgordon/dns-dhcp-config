@@ -26,7 +26,7 @@ def main():
     with con: 
         cur = con.cursor()
         cur.execute("DROP TABLE IF EXISTS hosts;") 
-        cur.execute("create table hosts  (dhcpname varchar(64) PRIMARY KEY, hostname varchar(64), ipaddress varchar(15), mac varchar(35), comment varchar(512));")
+        cur.execute("create table hosts  (dhcpname varchar(64) PRIMARY KEY NOT NULL, hostname varchar(64) NOT NULL, ipaddress varchar(15) NOT NULL, mac varchar(35) NOT NULL, comment varchar(512));")
         cur.execute("DROP TABLE IF EXISTS cname;")
         cur.execute("create table cname (cname varchar(64) PRIMARY KEY, host varchar(64), comment varchar(512));")
        
