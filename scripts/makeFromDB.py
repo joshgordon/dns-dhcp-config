@@ -39,16 +39,24 @@ def buildDNSHead(file):
     file.write("\t)\n\n\n")
 
 
-def addForwardDNS(file, host, IP): 
-    file.write("{0}\tIN\tA\t{1}\n".format(host, IP))
+def addForwardDNS(file, host, IP, comment): 
+    file.write("%-24sIN\tA\t%s" % (host, IP))
+    if (comment != ""): 
+        file.write("; {0}".format(comment))
+    file.write("\n") 
 
 def addCNAME(file, host, alias): 
-    file.write("{0}\tIN\tCNAME\t{1}\n".format(host, alias))
+    file.write("{0}\t\t\tIN\tCNAME\t{1}\n".format(host, alias))
     
-def addReverseDNS(file, host, ip): 
-    file.write("{0}\tIN\tPTR\t{1}.gordonclan.net.\n".format(ip.split('.')[3], host))
+def addReverseDNS(file, host, ip, comment): 
+    file.write("{0}\tIN\tPTR\t{1}.gordonclan.net.".format(ip.split('.')[3], host))
+    if (comment != ""): 
+        file.write(";{0}".format(comment))
+    file.write("\n")
 
-def addDHCP(file, uniqueName, mac, ip): 
+def addDHCP(file, uniqueName, mac, ip, comment): 
+    if (comment != ""): 
+        file.write("\n#{0}\n".format(comment))
     file.write("\thost {0} {{ \n\t\thardware ethernet {1};\n\t\tfixed-address {2};\n\t}}\n".format(uniqueName, mac, ip))
 
 def main(): 
@@ -85,7 +93,7 @@ def main():
         db_rdns.write("{0}.{1}.{2}.in-addr.arpa. \t IN \t NS \t {3}.\n".format(rdns_ip.split('.')[2], rdns_ip.split('.')[1], rdns_ip.split('.')[0], nameserver))
 
         buildDNSHead(db_domain) 
-        db_domain.write("@ \t IN \t NS \t {0}.\n".format(nameserver)) 
+        db_domain.write("@ \t\t\tIN \tNS \t{0}.\n".format(nameserver)) 
    
    
         # Get all of the hosts.  
@@ -99,9 +107,10 @@ def main():
             hostname = host["hostname"]
             ip = host["ipaddress"]
             mac = host["mac"]
-            addForwardDNS(db_domain, hostname, ip)
-            addReverseDNS(db_rdns, hostname, ip) 
-            addDHCP(dhcpdconf, dhcpname, mac, ip)
+            comment = host["comment"]
+            addForwardDNS(db_domain, hostname, ip, comment)
+            addReverseDNS(db_rdns, hostname, ip, comment) 
+            addDHCP(dhcpdconf, dhcpname, mac, ip, comment)
        
         # Select all the cnames. 
         cur.execute("SELECT * FROM cname;") 
