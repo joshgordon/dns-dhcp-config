@@ -12,6 +12,7 @@ class Registration {
     private     $db_connection              = null;                     // database connection   
     
     private     $user_name                  = "";                       // user's name
+    private     $user_email                 = "";                       // user's email
     private     $user_password              = "";                       // user's password (what comes from POST)
     private     $user_password_hash         = "";                       // user's hashed and salted password
     
@@ -66,10 +67,25 @@ class Registration {
             
             $this->errors[] = "Username does not fit the name sheme: only a-Z and numbers are allowed, 2 to 64 characters";
             
+        } elseif (empty($_POST['user_email'])) {
+            
+            $this->errors[] = "Email cannot be empty";
+            
+        } elseif (strlen($_POST['user_email']) > 64) {
+            
+            $this->errors[] = "Email cannot be longer than 64 characters";
+            
+        } elseif (!filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)) {
+            
+            $this->errors[] = "Your email adress is not in a valid email format";
+        
         } elseif (!empty($_POST['user_name'])
                   && strlen($_POST['user_name']) <= 64
                   && strlen($_POST['user_name']) >= 2
                   && preg_match('/^[a-z\d]{2,64}$/i', $_POST['user_name'])
+                  && !empty($_POST['user_email'])
+                  && strlen($_POST['user_email']) <= 64
+                  && filter_var($_POST['user_email'], FILTER_VALIDATE_EMAIL)
                   && !empty($_POST['user_password_new']) 
                   && !empty($_POST['user_password_repeat']) 
                   && ($_POST['user_password_new'] === $_POST['user_password_repeat'])) {
@@ -85,6 +101,7 @@ class Registration {
 
                 // escapin' this, additionally removing everything that could be (html/javascript-) code
                 $this->user_name            = $this->db_connection->real_escape_string(htmlentities($_POST['user_name'], ENT_QUOTES));
+                $this->user_email           = $this->db_connection->real_escape_string(htmlentities($_POST['user_email'], ENT_QUOTES));
                 
                 $this->user_password = $_POST['user_password_new'];
 
@@ -103,7 +120,7 @@ class Registration {
                 } else {
 
                     // write new users data into database
-                    $query_new_user_insert = $this->db_connection->query("INSERT INTO users (user_name, user_password_hash) VALUES('".$this->user_name."', '".$this->user_password_hash."');");
+                    $query_new_user_insert = $this->db_connection->query("INSERT INTO users (user_name, user_password_hash, user_email) VALUES('".$this->user_name."', '".$this->user_password_hash."', '".$this->user_email."');");
 
                     if ($query_new_user_insert) {
 
