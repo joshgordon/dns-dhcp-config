@@ -46,10 +46,10 @@ def addForwardDNS(file, host, IP, comment):
     file.write("\n") 
 
 def addCNAME(file, host, alias): 
-    file.write("{0}\t\t\tIN\tCNAME\t{1}\n".format(host, alias))
+    file.write("%-24sIN\tCNAME\t%s\n" % (host, alias))
     
 def addReverseDNS(file, host, ip, comment): 
-    file.write("{0}\tIN\tPTR\t{1}.gordonclan.net.".format(ip.split('.')[3], host))
+    file.write("{0}\tIN\tPTR\t{1}.gordonclan.net.".format(str(int(ip.split('.')[3])), host))
     if (comment != ""): 
         file.write(";{0}".format(comment))
     file.write("\n")
@@ -58,6 +58,16 @@ def addDHCP(file, uniqueName, mac, ip, comment):
     if (comment != ""): 
         file.write("\n#{0}\n".format(comment))
     file.write("\thost {0} {{ \n\t\thardware ethernet {1};\n\t\tfixed-address {2};\n\t}}\n".format(uniqueName, mac, ip))
+
+def cleanIP(ip): 
+    ipAddr = ip.split('.')
+    newIP = list() 
+    for octet in ipAddr:
+        octet = int(octet)
+        if octet < 0 or octet > 255:  
+            raise ValueError(ip + ' is not a valid ip address, skipping!') 
+        newIP.append(int(octet))
+    return '.'.join(map(str, newIP))
 
 def main(): 
     #Set up the DB connection 
@@ -97,20 +107,26 @@ def main():
    
    
         # Get all of the hosts.  
-        cur.execute("SELECT * FROM hosts;")
+        cur.execute("SELECT * FROM hosts order by ipaddress;")
 
         hosts = cur.fetchall() 
 
         #Loop through the hosts
         for host in hosts: 
-            dhcpname = host["dhcpname"]
-            hostname = host["hostname"]
-            ip = host["ipaddress"]
-            mac = host["mac"]
-            comment = host["comment"]
-            addForwardDNS(db_domain, hostname, ip, comment)
-            addReverseDNS(db_rdns, hostname, ip, comment) 
-            addDHCP(dhcpdconf, dhcpname, mac, ip, comment)
+            try: 
+                dhcpname = host["dhcpname"]
+                hostname = host["hostname"]
+                ip = cleanIP(host["ipaddress"])
+                mac = host["mac"]
+                comment = host["comment"]
+                addForwardDNS(db_domain, hostname, ip, comment)
+                if(mac != "00:00:00:00:00:00"): 
+                    addReverseDNS(db_rdns, hostname, ip, comment) 
+                    addDHCP(dhcpdconf, dhcpname, mac, ip, comment)
+            except ValueError as e: 
+                print '[\033[91m!!\033[0m]', 
+                print e
+
        
         # Select all the cnames. 
         cur.execute("SELECT * FROM cname;") 
