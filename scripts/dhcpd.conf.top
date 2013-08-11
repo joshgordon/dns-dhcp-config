@@ -16,8 +16,8 @@ ddns-update-style none;
 
 # option definitions common to all supported networks...
 option subnet-mask 255.255.254.0; 
-option domain-name "example.com";
-option domain-name-servers 192.168.0.10;
+option domain-name "gordonclan.net";
+option domain-name-servers 192.168.0.10, 8.8.8.8, 8.8.4.4;
 option routers 192.168.0.1; 
 
 default-lease-time 600;

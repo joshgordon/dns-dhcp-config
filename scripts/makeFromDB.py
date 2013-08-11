@@ -54,10 +54,11 @@ def addReverseDNS(file, host, ip, comment):
         file.write(";{0}".format(comment))
     file.write("\n")
 
-def addDHCP(file, uniqueName, mac, ip, comment): 
+def addDHCP(file, uniqueName, mac, ip, comment, host): 
     if (comment != ""): 
         file.write("\n#{0}\n".format(comment))
-    file.write("\thost {0} {{ \n\t\thardware ethernet {1};\n\t\tfixed-address {2};\n\t}}\n".format(uniqueName, mac, ip))
+    file.write("\thost {0} {{ \n\t\thardware ethernet {1};\n\t\tfixed-address {2};\n".format(uniqueName, mac, ip))
+    file.write("""\t\toption host-name "{0}.gordonclan.net";\n\t}}\n""".format(host))
 
 def cleanIP(ip): 
     ipAddr = ip.split('.')
@@ -83,20 +84,20 @@ def main():
 
         #Remove the existing config files. 
         try: 
-            os.remove(dns_file)
-            os.remove(rdns_file)
-            os.remove('dhcpd.conf') 
+            os.remove('/tmp/%s' % dns_file)
+            os.remove('/tmp/%s' % rdns_file)
+            os.remove('/tmp/dhcpd.conf') 
         
         except: 
             print "One or more config files not found. Recreating." 
     
         #copy the head of the dhcp config file. 
-        shutil.copy('dhcpd.conf.top', 'dhcpd.conf')
+        shutil.copy('dhcpd.conf.top', '/tmp/dhcpd.conf')
     
         #Open the files for writing: 
-        db_rdns = file(rdns_file, 'w') 
-        db_domain = file(dns_file, 'w') 
-        dhcpdconf = file('dhcpd.conf', 'a') 
+        db_rdns = file('/tmp/%s' % rdns_file, 'w') 
+        db_domain = file('/tmp/%s' % dns_file, 'w') 
+        dhcpdconf = file('/tmp/dhcpd.conf', 'a') 
     
         #build the top part of the dhcp files. 
         buildDNSHead(db_rdns)
@@ -122,7 +123,7 @@ def main():
                 addForwardDNS(db_domain, hostname, ip, comment)
                 if(mac != "00:00:00:00:00:00"): 
                     addReverseDNS(db_rdns, hostname, ip, comment) 
-                    addDHCP(dhcpdconf, dhcpname, mac, ip, comment)
+                    addDHCP(dhcpdconf, dhcpname, mac, ip, comment, hostname)
             except ValueError as e: 
                 print '[\033[91m!!\033[0m]', 
                 print e
