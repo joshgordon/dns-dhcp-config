@@ -49,16 +49,24 @@ def addCNAME(file, host, alias):
     file.write("%-24sIN\tCNAME\t%s\n" % (host, alias))
     
 def addReverseDNS(file, host, ip, comment): 
-    file.write("{0}\tIN\tPTR\t{1}.gordonclan.net.".format(str(int(ip.split('.')[3])), host))
+    file.write("{0}\tIN\tPTR\t{1}.{2}.".format(str(int(ip.split('.')[3])), host, domain))
     if (comment != ""): 
         file.write(";{0}".format(comment))
     file.write("\n")
+
+def addAdditionalDNS(file, host, type, value): 
+    file.write("%-24s%-8s%-8s%s" % (host, "IN", type, value))
+    file.write("\n")
+    
 
 def addDHCP(file, uniqueName, mac, ip, comment, host): 
     if (comment != ""): 
         file.write("\n#{0}\n".format(comment))
     file.write("\thost {0} {{ \n\t\thardware ethernet {1};\n\t\tfixed-address {2};\n".format(uniqueName, mac, ip))
-    file.write("""\t\toption host-name "{0}.gordonclan.net";\n\t}}\n""".format(host))
+    file.write("""\t\toption host-name "{0}.{1}";\n\t}}\n""".format(host, domain))
+
+def addHost(file, ip, host):
+    file.write("%-16s %s %s.%s\n" % (ip, host, host, domain))
 
 def cleanIP(ip): 
     ipAddr = ip.split('.')
@@ -86,7 +94,8 @@ def main():
         try: 
             os.remove('/tmp/%s' % dns_file)
             os.remove('/tmp/%s' % rdns_file)
-            os.remove('/tmp/dhcpd.conf') 
+            os.remove('/tmp/dhcpd.conf')
+	    os.remove('/tmp/hosts') 
         
         except: 
             print "One or more config files not found. Recreating." 
@@ -98,6 +107,7 @@ def main():
         db_rdns = file('/tmp/%s' % rdns_file, 'w') 
         db_domain = file('/tmp/%s' % dns_file, 'w') 
         dhcpdconf = file('/tmp/dhcpd.conf', 'a') 
+	hostsFile = file('/tmp/hosts', 'w')
     
         #build the top part of the dhcp files. 
         buildDNSHead(db_rdns)
@@ -124,6 +134,8 @@ def main():
                 if(mac != "00:00:00:00:00:00"): 
                     addReverseDNS(db_rdns, hostname, ip, comment) 
                     addDHCP(dhcpdconf, dhcpname, mac, ip, comment, hostname)
+                    if hostname != "@": 
+                        addHost(hostsFile, ip, hostname)
             except ValueError as e: 
                 print '[\033[91m!!\033[0m]', 
                 print e
@@ -138,6 +150,14 @@ def main():
             addCNAME(db_domain, cname["cname"], cname["host"])
  
         dhcpdconf.write("}\n"); 
+        
+        # Grab all the additional records: 
+        cur.execute("SELECT * FROM additional_records;")
+        
+        additional = cur.fetchall()
+        
+        for record in additional: 
+            addAdditionalDNS(db_domain, record["host"], record["type"], record["value"])
         
         db_rdns.close() 
         db_domain.close() 
