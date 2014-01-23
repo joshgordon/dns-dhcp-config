@@ -44,21 +44,21 @@ class db:
     self.cur.execute("SELECT * FROM hosts order by ipaddress;")
     
     hosts = cur.fetchall() 
-    reutrn hosts 
+    return hosts 
 
 ################################################################################
 # Return all the cnames as a list of dictionaries. 
 def getCnames(self): 
-    # Select all the cnames. 
-    self.cur.execute("SELECT * FROM cname;") 
-    cnames = cur.fetchall() 
-    return cnames 
+  # Select all the cnames. 
+  self.cur.execute("SELECT * FROM cname;") 
+  cnames = cur.fetchall() 
+  return cnames 
 
 ################################################################################
 # Gets all the additional records. Returns a list/tuple of dictionaries. 
 def getAdditional(self): 
   # Grab all the additional records: 
-  cur.execute("SELECT * FROM additional_records;")
+  self.cur.execute("SELECT * FROM additional_records;")
   additional = cur.fetchall()
         
 
