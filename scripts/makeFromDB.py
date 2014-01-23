@@ -124,7 +124,7 @@ def cleanIP(ip):
 # Pretty self explanitory. 
 def main(): 
     #Set up the DB connection 
-    con = db.db()
+    con = db()
 
     with db: 
         #Compute the file names. 
