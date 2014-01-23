@@ -123,10 +123,7 @@ def cleanIP(ip):
 # Main
 # Pretty self explanitory. 
 def main(): 
-    #Set up the DB connection 
-    con = db()
-
-    with db: 
+    with db() as db: 
         #Compute the file names. 
         dns_file="db." + domain 
         rdns_file="db." + rdns_ip.split('.')[0]
