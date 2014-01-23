@@ -32,7 +32,7 @@ class database:
 
 ################################################################################
 # Tear down the db connection.     
-  def __exit__(self): 
+  def __exit__(self, type, value, traceback): 
     self.cur.close() 
     self.con.close() 
     
