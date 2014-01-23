@@ -21,15 +21,13 @@ import MySQLdb as mdb
 
 class database: 
   """Talks to the database.""" 
-  cur
-  con
 
 
 ################################################################################
 # Set up the database connection.   
   def __enter__(self): 
-    con = mdb.connect(dbhost, dbuser, dbpass, dbname) 
-    cur = con.cursor(mdb.cursors.DictCursor) 
+    self.con = mdb.connect(dbhost, dbuser, dbpass, dbname) 
+    self.cur = con.cursor(mdb.cursors.DictCursor) 
 
 
 ################################################################################
