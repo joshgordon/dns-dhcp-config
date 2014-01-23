@@ -1,4 +1,12 @@
 #!/usr/bin/python
+# makeFromDB.py 
+# This file will load a dns and dhcp configuration from a database, then creates
+# valid configuration files from said database. The database is a single 
+# external library so that it can easily be replaced by another. 
+# 
+# Copyright 2014 Josh Gordon <code@joshgordon.net> 
+# All code is released under GPL v2. 
+# 
 
 from config import * 
 import sys
@@ -9,6 +17,11 @@ import MySQLdb as mdb
 
 #Adapted from: https://gist.github.com/pklaus/2016269
 
+
+################################################################################
+# Write out the header for the DNS zone file. This should be called before 
+# writing out any dns zone records. 
+# 
 def buildDNSHead(file):
 
     # Configuration options 
@@ -38,36 +51,64 @@ def buildDNSHead(file):
     file.write("\t{0}\t; NXDOMAIN cache time\n".format(nxdomain_cache_time))
     file.write("\t)\n\n\n")
 
-
+################################################################################
+# Add a forward DNS record to a dns zone file. Takes the file handle, hostname, 
+# ip address, and the comment. 
+#
 def addForwardDNS(file, host, IP, comment): 
     file.write("%-24sIN\tA\t%s" % (host, IP))
     if (comment != ""): 
         file.write("; {0}".format(comment))
     file.write("\n") 
 
+################################################################################
+# Adds a cname to the dns zone file. Takes file handle, hostname, and alias. 
+# Alias is what the new cname record should point to. 
+#
 def addCNAME(file, host, alias): 
     file.write("%-24sIN\tCNAME\t%s\n" % (host, alias))
-    
+
+################################################################################
+# Adds a reverse DNS record to the reverse zone file. Takes the full IP and 
+# automatically rips out the last octet.  
+#
 def addReverseDNS(file, host, ip, comment): 
     file.write("{0}\tIN\tPTR\t{1}.{2}.".format(str(int(ip.split('.')[3])), host, domain))
     if (comment != ""): 
         file.write(";{0}".format(comment))
     file.write("\n")
 
+
+################################################################################
+# Adds any kind of dns record to a dns zone file. Useful for SRV records, 
+# TXT records, etc. 
+# 
 def addAdditionalDNS(file, host, type, value): 
     file.write("%-24s%-8s%-8s%s" % (host, "IN", type, value))
     file.write("\n")
     
-
+################################################################################
+# Adds a record to DHCP. uniqueName (as the name suggests) has to be unique
+# in order for isc-dhcp-server to be happy. 
+# 
 def addDHCP(file, uniqueName, mac, ip, comment, host): 
     if (comment != ""): 
         file.write("\n#{0}\n".format(comment))
     file.write("\thost {0} {{ \n\t\thardware ethernet {1};\n\t\tfixed-address {2};\n".format(uniqueName, mac, ip))
     file.write("""\t\toption host-name "{0}.{1}";\n\t}}\n""".format(host, domain))
 
+################################################################################
+# Adds a host to a host file. (to be put in /etc/hosts, or 
+# C:\Windows\System32\Drivers\etc\hosts.) Useful if for some stupid reason your
+# DNS server isn't reliable. 
+# 
 def addHost(file, ip, host):
     file.write("%-16s %s %s.%s\n" % (ip, host, host, domain))
 
+################################################################################
+# Sanitizes IP input. 
+# http://xkcd.com/327 (little bobby tables.) 
+#
 def cleanIP(ip): 
     ipAddr = ip.split('.')
     newIP = list() 
@@ -78,13 +119,14 @@ def cleanIP(ip):
         newIP.append(int(octet))
     return '.'.join(map(str, newIP))
 
+################################################################################
+# Main
+# Pretty self explanitory. 
 def main(): 
     #Set up the DB connection 
-    con = mdb.connect(dbhost, dbuser, dbpass, dbname)
+    con = db.db()
 
-    with con: 
-        cur = con.cursor(mdb.cursors.DictCursor) 
-        
+    with db: 
         #Compute the file names. 
         dns_file="db." + domain 
         rdns_file="db." + rdns_ip.split('.')[0]
@@ -115,12 +157,8 @@ def main():
 
         buildDNSHead(db_domain) 
         db_domain.write("@ \t\t\tIN \tNS \t{0}.\n".format(nameserver)) 
-   
-   
-        # Get all of the hosts.  
-        cur.execute("SELECT * FROM hosts order by ipaddress;")
 
-        hosts = cur.fetchall() 
+        hosts = db.getHosts()
 
         #Loop through the hosts
         for host in hosts: 
@@ -140,22 +178,16 @@ def main():
                 print '[\033[91m!!\033[0m]', 
                 print e
 
-       
-        # Select all the cnames. 
-        cur.execute("SELECT * FROM cname;") 
- 
-        cnames = cur.fetchall() 
+
+        cnames = db.getCnames()
          
         for cname in cnames:
             addCNAME(db_domain, cname["cname"], cname["host"])
  
         dhcpdconf.write("}\n"); 
         
-        # Grab all the additional records: 
-        cur.execute("SELECT * FROM additional_records;")
-        
-        additional = cur.fetchall()
-        
+        additional = getAdditional() 
+
         for record in additional: 
             addAdditionalDNS(db_domain, record["host"], record["type"], record["value"])
         

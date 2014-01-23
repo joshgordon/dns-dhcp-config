@@ -1,0 +1,64 @@
+#!/usr/bin/python
+# netMySQL.py
+# This is the interface for the mysql database. All of the talking to the mysql
+# database is done through the functions in this file. 
+# 
+# Copyright 2014 Josh Gordon <code@joshgordon.net> 
+# All code is released under GPL v2. 
+# 
+# The following functions are implemented in this file. A short description is 
+# located in this header, for your convinence. All real functions (not __enter__
+# or __exit__) return a list or tuple of dictionaries. 
+# 
+# getHosts() - returns all of the hosts. 
+# getCnames() - returns all of the cnames. 
+# getAdditional() - returns all of the additional records. 
+
+
+from config import * 
+import MySQLdb as mdb
+
+
+class db: 
+  """Talks to the database.""" 
+
+
+################################################################################
+# Set up the database connection.   
+  def __enter__(self): 
+    con = mdb.connect(dbhost, dbuser, dbpass, dbname) 
+    cur = con.cursor(mdb.cursors.DictCursor) 
+
+
+################################################################################
+# Tear down the db connection.     
+  def __exit__(self): 
+    self.cur.close() 
+    self.con.close() 
+    
+    
+################################################################################
+# Return all the hosts as a list of dictionaries. 
+  def getHosts(self): 
+    # Get all of the hosts.  
+    self.cur.execute("SELECT * FROM hosts order by ipaddress;")
+    
+    hosts = cur.fetchall() 
+    reutrn hosts 
+
+################################################################################
+# Return all the cnames as a list of dictionaries. 
+def getCnames(self): 
+    # Select all the cnames. 
+    self.cur.execute("SELECT * FROM cname;") 
+    cnames = cur.fetchall() 
+    return cnames 
+
+################################################################################
+# Gets all the additional records. Returns a list/tuple of dictionaries. 
+def getAdditional(self): 
+  # Grab all the additional records: 
+  cur.execute("SELECT * FROM additional_records;")
+  additional = cur.fetchall()
+        
+
