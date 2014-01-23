@@ -13,7 +13,7 @@ import sys
 import os
 import shutil
 from datetime import datetime
-from netMySQL import db
+from netMySQL import database
 
 #Adapted from: https://gist.github.com/pklaus/2016269
 
@@ -123,7 +123,7 @@ def cleanIP(ip):
 # Main
 # Pretty self explanitory. 
 def main(): 
-    with db() as db: 
+    with database() as db: 
         #Compute the file names. 
         dns_file="db." + domain 
         rdns_file="db." + rdns_ip.split('.')[0]

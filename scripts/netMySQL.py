@@ -19,7 +19,7 @@ from config import *
 import MySQLdb as mdb
 
 
-class db: 
+class database: 
   """Talks to the database.""" 
 
 
