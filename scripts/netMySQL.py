@@ -27,7 +27,7 @@ class database:
 # Set up the database connection.   
   def __enter__(self): 
     self.con = mdb.connect(dbhost, dbuser, dbpass, dbname) 
-    self.cur = con.cursor(mdb.cursors.DictCursor) 
+    self.cur = self.con.cursor(mdb.cursors.DictCursor) 
 
 
 ################################################################################
