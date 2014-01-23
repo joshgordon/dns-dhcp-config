@@ -20,8 +20,8 @@ option domain-name "gordonclan.net";
 option domain-name-servers 192.168.0.10, 8.8.8.8, 8.8.4.4;
 option routers 192.168.0.1; 
 
-default-lease-time 600;
-max-lease-time 7200;
+default-lease-time 86400;
+max-lease-time 604800;
 
 # If this DHCP server is the official DHCP server for the local
 # network, the authoritative directive should be uncommented.

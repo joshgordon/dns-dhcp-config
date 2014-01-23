@@ -123,7 +123,8 @@ def cleanIP(ip):
 # Main
 # Pretty self explanitory. 
 def main(): 
-    with database() as db: 
+    db = database() 
+    with db:
         #Compute the file names. 
         dns_file="db." + domain 
         rdns_file="db." + rdns_ip.split('.')[0]
@@ -183,7 +184,7 @@ def main():
  
         dhcpdconf.write("}\n"); 
         
-        additional = getAdditional() 
+        additional = db.getAdditional() 
 
         for record in additional: 
             addAdditionalDNS(db_domain, record["host"], record["type"], record["value"])
