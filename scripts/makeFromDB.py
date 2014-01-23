@@ -13,7 +13,7 @@ import sys
 import os
 import shutil
 from datetime import datetime
-import MySQLdb as mdb
+from netMySQL import db
 
 #Adapted from: https://gist.github.com/pklaus/2016269
 
