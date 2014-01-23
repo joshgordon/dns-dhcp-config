@@ -21,6 +21,8 @@ import MySQLdb as mdb
 
 class database: 
   """Talks to the database.""" 
+  cur
+  con
 
 
 ################################################################################
